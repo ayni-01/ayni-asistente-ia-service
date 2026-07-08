@@ -59,6 +59,13 @@
 **Interfaces:**
 - Produces (used by Task 2 and Task 3): `AsistenteIAPort.responder(String systemPrompt, String userPrompt) -> String`; `RetoContextoRepository.obtenerPorId(String retoId) -> Optional<RetoContexto>`; `RetoContexto(String id, String titulo, String descripcion, String categoria, String nivelDificultad, List<String> requisitos)`.
 
+- [ ] **Step 0: Create the branch (before any file or commit)**
+
+```bash
+git checkout -b feature/scrum-61-consulta-reto
+```
+All commits in this task happen on this branch — `main` stays untouched until the PR merges.
+
 - [ ] **Step 1: Create `pom.xml`**
 
 ```xml
@@ -1258,7 +1265,6 @@ git commit -m "feat: US21 - consultar al asistente IA sobre un reto (SCRUM-61)"
 - [ ] **Step 22: Push the branch and open the PR**
 
 ```bash
-git checkout -b feature/scrum-61-consulta-reto
 git push -u origin feature/scrum-61-consulta-reto
 gh pr create --repo ayni-01/ayni-asistente-ia-service \
   --title "US21 (SCRUM-61): Consultar al asistente IA sobre un reto" \
