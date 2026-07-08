@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ayni-asistente-db
+    environment:
+      POSTGRES_DB: somosayni
+      POSTGRES_USER: somosayni
+      POSTGRES_PASSWORD: somosayni123
+    ports:
+      - "5439:5432"
+    volumes:
+      - asistente_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U somosayni"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  asistente-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ayni-asistente-ia-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_USERNAME: somosayni
+      DB_PASSWORD: somosayni123
+      JWT_SECRET: ${JWT_SECRET}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-deepseek/deepseek-chat-v3.1:free}
+    ports:
+      - "8088:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  asistente_data:
