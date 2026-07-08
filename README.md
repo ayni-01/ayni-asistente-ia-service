@@ -23,6 +23,7 @@ y `habilidades-service` (mismo patrón que `metricas-service`).
 |--------|------|-------------|------|
 | `POST` | `/api/v1/asistente/retos/{retoId}/consulta` | Preguntar sobre un reto (US21) | JWT |
 | `GET` | `/api/v1/asistente/recomendaciones` | Recomendaciones de aprendizaje personalizadas (US22) | JWT |
+| `POST` | `/api/v1/asistente/postulaciones/{postulacionId}/feedback` | Feedback sobre el enfoque de solución (US23) | JWT (dueño) |
 
 ### Body de `POST /api/v1/asistente/retos/{retoId}/consulta`
 
