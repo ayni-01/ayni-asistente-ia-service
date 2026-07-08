@@ -23,6 +23,11 @@ public class RetoContextoRepositoryImpl implements RetoContextoRepository {
         return jpaRepository.findById(retoId).map(this::toDomain);
     }
 
+    @Override
+    public List<RetoContexto> obtenerActivos() {
+        return jpaRepository.findByEstado("ACTIVO").stream().map(this::toDomain).toList();
+    }
+
     private RetoContexto toDomain(RetoSnapshot snapshot) {
         List<String> requisitos = snapshot.getRequisitos() == null ? List.of() : snapshot.getRequisitos();
         return new RetoContexto(
