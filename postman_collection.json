@@ -1,0 +1,240 @@
+{
+  "info": {
+    "name": "Somos Ayni — asistente-ia-service",
+    "description": "Endpoints del asistente-ia-service (puerto 8088), más los requests auxiliares de identidad/retos/postulaciones necesarios para generar un JWT, un reto y una postulación reales antes de probar el asistente. Requiere JWT de identidad-service (puerto 8081). Corre las carpetas en orden: 1) Setup, 2) Asistente IA.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "BASE_IDENTIDAD", "value": "http://localhost:8081" },
+    { "key": "BASE_RETOS", "value": "http://localhost:8083" },
+    { "key": "BASE_POSTULACIONES", "value": "http://localhost:8084" },
+    { "key": "BASE_ASISTENTE", "value": "http://localhost:8088" },
+    { "key": "TOKEN_EMPRESA", "value": "" },
+    { "key": "TOKEN_TALENTO", "value": "" },
+    { "key": "ID_EMPRESA", "value": "" },
+    { "key": "ID_TALENTO", "value": "" },
+    { "key": "RETO_ID", "value": "" },
+    { "key": "POSTULACION_ID", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Setup",
+      "item": [
+        {
+          "name": "Registro Empresa",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{BASE_IDENTIDAD}}/api/v1/auth/registro",
+              "host": ["{{BASE_IDENTIDAD}}"],
+              "path": ["api", "v1", "auth", "registro"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"empresa-demo@ayni.com\",\"password\":\"password123\",\"rol\":\"EMPRESA\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r=pm.response.json();pm.collectionVariables.set(\"TOKEN_EMPRESA\",r.token);pm.collectionVariables.set(\"ID_EMPRESA\",r.usuarioId);pm.test(\"201\",()=>pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Registro Talento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{BASE_IDENTIDAD}}/api/v1/auth/registro",
+              "host": ["{{BASE_IDENTIDAD}}"],
+              "path": ["api", "v1", "auth", "registro"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"talento-demo@ayni.com\",\"password\":\"password123\",\"rol\":\"TALENTO\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r=pm.response.json();pm.collectionVariables.set(\"TOKEN_TALENTO\",r.token);pm.collectionVariables.set(\"ID_TALENTO\",r.usuarioId);pm.test(\"201\",()=>pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Publicar Reto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN_EMPRESA}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_RETOS}}/api/v1/retos",
+              "host": ["{{BASE_RETOS}}"],
+              "path": ["api", "v1", "retos"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"titulo\":\"Landing page en React\",\"descripcion\":\"Construir una landing responsive con formulario de contacto\",\"categoria\":\"FRONTEND\",\"requisitos\":[\"Usar React\",\"Ser responsive\"],\"entregables\":[\"Repositorio con el código\"],\"tipoRecompensa\":\"DIPLOMA\",\"montoRecompensa\":0,\"fechaLimite\":\"2026-12-31\",\"nivelDificultad\":\"JUNIOR\",\"cuposDisponibles\":5}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r=pm.response.json();pm.collectionVariables.set(\"RETO_ID\",r.id);pm.test(\"201\",()=>pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Postular a Reto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN_TALENTO}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_POSTULACIONES}}/api/v1/postulaciones",
+              "host": ["{{BASE_POSTULACIONES}}"],
+              "path": ["api", "v1", "postulaciones"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"retoId\":\"{{RETO_ID}}\",\"urlSolucion\":\"https://github.com/demo/solucion\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var r=pm.response.json();pm.collectionVariables.set(\"POSTULACION_ID\",r.id);pm.test(\"201\",()=>pm.response.to.have.status(201));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Asistente IA",
+      "item": [
+        {
+          "name": "US21 - Consultar sobre Reto",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN_TALENTO}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_ASISTENTE}}/api/v1/asistente/retos/{{RETO_ID}}/consulta",
+              "host": ["{{BASE_ASISTENTE}}"],
+              "path": ["api", "v1", "asistente", "retos", "{{RETO_ID}}", "consulta"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"pregunta\":\"¿Qué tecnologías necesito para resolver este reto?\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"200\",()=>pm.response.to.have.status(200));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "US22 - Recomendaciones de Aprendizaje",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{TOKEN_TALENTO}}" }],
+            "url": {
+              "raw": "{{BASE_ASISTENTE}}/api/v1/asistente/recomendaciones",
+              "host": ["{{BASE_ASISTENTE}}"],
+              "path": ["api", "v1", "asistente", "recomendaciones"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"200\",()=>pm.response.to.have.status(200));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "US23 - Feedback de Enfoque de Solución",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{TOKEN_TALENTO}}" }
+            ],
+            "url": {
+              "raw": "{{BASE_ASISTENTE}}/api/v1/asistente/postulaciones/{{POSTULACION_ID}}/feedback",
+              "host": ["{{BASE_ASISTENTE}}"],
+              "path": ["api", "v1", "asistente", "postulaciones", "{{POSTULACION_ID}}", "feedback"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"enfoqueSolucion\":\"Voy a usar componentes funcionales de React con hooks y CSS Grid para el layout responsive\"}",
+              "options": { "raw": { "language": "json" } }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"200\",()=>pm.response.to.have.status(200));"],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_ASISTENTE}}/actuator/health",
+              "host": ["{{BASE_ASISTENTE}}"],
+              "path": ["actuator", "health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
