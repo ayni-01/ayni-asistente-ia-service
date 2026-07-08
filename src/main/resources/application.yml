@@ -24,7 +24,7 @@ spring:
       chat:
         completions-path: /chat/completions
         options:
-          model: ${OPENROUTER_MODEL:deepseek/deepseek-chat-v3.1:free}
+          model: ${OPENROUTER_MODEL:openai/gpt-oss-20b:free}
 
 server:
   port: ${PORT:8088}

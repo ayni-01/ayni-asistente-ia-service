@@ -81,7 +81,7 @@ docker-compose up --build
 | `DB_USERNAME` / `DB_PASSWORD` | Credenciales de la BD | `somosayni` / `somosayni123` |
 | `JWT_SECRET` | Clave compartida para validar JWT firmados por `identidad-service` | *(obligatorio, mismo valor en los 8 servicios)* |
 | `OPENROUTER_API_KEY` | API key de OpenRouter | *(obligatorio, nunca se commitea)* |
-| `OPENROUTER_MODEL` | Modelo de OpenRouter a usar | `deepseek/deepseek-chat-v3.1:free` |
+| `OPENROUTER_MODEL` | Modelo de OpenRouter a usar | `openai/gpt-oss-20b:free` |
 | `PORT` | Puerto del servicio | `8088` |
 
 ## Swagger / OpenAPI
