@@ -22,6 +22,8 @@ public class RetoSnapshot {
     @Column(name = "nivel_dificultad")
     private String nivelDificultad;
 
+    private String estado;
+
     @ElementCollection
     @CollectionTable(name = "reto_requisito", joinColumns = @JoinColumn(name = "reto_id"))
     @Column(name = "descripcion")
@@ -32,5 +34,6 @@ public class RetoSnapshot {
     public String getDescripcion() { return descripcion; }
     public String getCategoria() { return categoria; }
     public String getNivelDificultad() { return nivelDificultad; }
+    public String getEstado() { return estado; }
     public List<String> getRequisitos() { return requisitos; }
 }
