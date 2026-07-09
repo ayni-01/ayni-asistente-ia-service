@@ -1,7 +1,7 @@
 # 🤖 Ayni Asistente IA Service
 
 Microservicio de IA de la plataforma **Somos Ayni**, construido con **Spring AI**
-contra un modelo gratuito de [OpenRouter](https://openrouter.ai). No tiene tablas
+contra la API de [OpenAI](https://platform.openai.com). No tiene tablas
 propias: lee en modo solo-lectura las tablas de `retos-service`, `postulaciones-service`
 y `habilidades-service` (mismo patrón que `metricas-service`).
 
@@ -45,7 +45,7 @@ src/main/java/com/somosayni/asistente/
 │   ├── port/               # RetoContextoRepository, AsistenteIAPort, ...
 │   └── query/               # ConsultarRetoQuery(Handler), ...
 └── infrastructure/
-    ├── ai/                  # SpringAiAsistenteAdapter (Spring AI -> OpenRouter)
+    ├── ai/                  # SpringAiAsistenteAdapter (Spring AI -> OpenAI)
     ├── persistence/          # entidades *Snapshot de solo lectura + adapters
     ├── rest/                 # AsistenteController + DTOs
     └── config/               # JWT, Security, CORS, OpenAPI
@@ -60,7 +60,7 @@ src/main/java/com/somosayni/asistente/
 # ya poblado por retos-service/postulaciones-service/habilidades-service
 # (este servicio no crea tablas: ddl-auto=none)
 
-export OPENROUTER_API_KEY=tu-api-key-de-openrouter
+export OPENAI_API_KEY=tu-api-key-de-openai
 mvn clean package -DskipTests
 java -jar target/*.jar
 ```
@@ -69,7 +69,7 @@ java -jar target/*.jar
 
 ```bash
 cp .env.example .env
-# Editar .env con tus valores reales (JWT_SECRET, OPENROUTER_API_KEY)
+# Editar .env con tus valores reales (JWT_SECRET, OPENAI_API_KEY)
 docker-compose up --build
 ```
 
@@ -80,8 +80,8 @@ docker-compose up --build
 | `DB_HOST` / `DB_PORT` / `DB_NAME` | Conexión a la Postgres compartida `somosayni` | `localhost` / `5432` / `somosayni` |
 | `DB_USERNAME` / `DB_PASSWORD` | Credenciales de la BD | `somosayni` / `somosayni123` |
 | `JWT_SECRET` | Clave compartida para validar JWT firmados por `identidad-service` | *(obligatorio, mismo valor en los 8 servicios)* |
-| `OPENROUTER_API_KEY` | API key de OpenRouter | *(obligatorio, nunca se commitea)* |
-| `OPENROUTER_MODEL` | Modelo de OpenRouter a usar | `openai/gpt-oss-20b:free` |
+| `OPENAI_API_KEY` | API key de OpenAI | *(obligatorio, nunca se commitea)* |
+| `OPENAI_MODEL` | Modelo de OpenAI a usar | `gpt-4o-mini` |
 | `PORT` | Puerto del servicio | `8088` |
 
 ## Swagger / OpenAPI
