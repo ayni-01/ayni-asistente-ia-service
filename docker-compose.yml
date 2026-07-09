@@ -28,8 +28,8 @@ services:
       DB_USERNAME: somosayni
       DB_PASSWORD: somosayni123
       JWT_SECRET: ${JWT_SECRET}
-      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
-      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-openai/gpt-oss-20b:free}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
     ports:
       - "8088:8088"
     depends_on:
