@@ -1,11 +1,10 @@
 package com.somosayni.asistente.application.query;
 
 import com.somosayni.asistente.application.port.AsistenteIAPort;
+import com.somosayni.asistente.application.port.CatalogoRecursosPort;
 import com.somosayni.asistente.application.port.HabilidadContextoRepository;
-import com.somosayni.asistente.application.port.RetoContextoRepository;
 import com.somosayni.asistente.domain.model.HabilidadContexto;
 import com.somosayni.asistente.domain.model.RecomendacionAprendizaje;
-import com.somosayni.asistente.domain.model.RetoContexto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,7 +14,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -26,43 +27,43 @@ class ObtenerRecomendacionesQueryHandlerTest {
     HabilidadContextoRepository habilidadContextoRepository;
 
     @Mock
-    RetoContextoRepository retoContextoRepository;
+    CatalogoRecursosPort catalogoRecursosPort;
 
     @Mock
     AsistenteIAPort asistenteIAPort;
 
     @Test
-    void incluyeLasHabilidadesDelTalentoEnElPromptCuandoTiene() {
+    void construyeLaConsultaRagConLasHabilidadesDelTalento() {
         when(habilidadContextoRepository.obtenerPorTalentoId("talento-1"))
                 .thenReturn(List.of(new HabilidadContexto("React", "INTERMEDIO", 60)));
-        when(retoContextoRepository.obtenerActivos())
-                .thenReturn(List.of(new RetoContexto("reto-1", "t", "d", "BACKEND", "JUNIOR", List.of())));
+        when(catalogoRecursosPort.buscarRelevantes(anyString(), anyInt())).thenReturn("contexto");
         List<RecomendacionAprendizaje> esperado = List.of(
-                new RecomendacionAprendizaje("Spring Boot", "Hay retos activos de BACKEND", "JUNIOR"));
-        when(asistenteIAPort.responderRecomendaciones(anyString(), anyString())).thenReturn(esperado);
+                new RecomendacionAprendizaje("Angular", "Cierra tu brecha frontend", "INTERMEDIO",
+                        "Angular desde cero", "https://recursos.somosayni.com/angular"));
+        when(asistenteIAPort.recomendarConRag("talento-1", "contexto")).thenReturn(esperado);
 
         ObtenerRecomendacionesQueryHandler handler = new ObtenerRecomendacionesQueryHandler(
-                habilidadContextoRepository, retoContextoRepository, asistenteIAPort);
+                habilidadContextoRepository, catalogoRecursosPort, asistenteIAPort);
         List<RecomendacionAprendizaje> resultado = handler.handle(new ObtenerRecomendacionesQuery("talento-1"));
 
         assertThat(resultado).isEqualTo(esperado);
-        ArgumentCaptor<String> userPromptCaptor = ArgumentCaptor.forClass(String.class);
-        verify(asistenteIAPort).responderRecomendaciones(anyString(), userPromptCaptor.capture());
-        assertThat(userPromptCaptor.getValue()).contains("React").contains("BACKEND");
+        ArgumentCaptor<String> consultaCaptor = ArgumentCaptor.forClass(String.class);
+        verify(catalogoRecursosPort).buscarRelevantes(consultaCaptor.capture(), eq(5));
+        assertThat(consultaCaptor.getValue()).contains("React");
     }
 
     @Test
-    void usaUnPromptGenericoCuandoElTalentoNoTieneHabilidadesValidadas() {
+    void usaUnaConsultaGenericaCuandoElTalentoNoTieneHabilidadesValidadas() {
         when(habilidadContextoRepository.obtenerPorTalentoId("talento-2")).thenReturn(List.of());
-        when(retoContextoRepository.obtenerActivos()).thenReturn(List.of());
-        when(asistenteIAPort.responderRecomendaciones(anyString(), anyString())).thenReturn(List.of());
+        when(catalogoRecursosPort.buscarRelevantes(anyString(), anyInt())).thenReturn("contexto");
+        when(asistenteIAPort.recomendarConRag(eq("talento-2"), anyString())).thenReturn(List.of());
 
         ObtenerRecomendacionesQueryHandler handler = new ObtenerRecomendacionesQueryHandler(
-                habilidadContextoRepository, retoContextoRepository, asistenteIAPort);
+                habilidadContextoRepository, catalogoRecursosPort, asistenteIAPort);
         handler.handle(new ObtenerRecomendacionesQuery("talento-2"));
 
-        ArgumentCaptor<String> userPromptCaptor = ArgumentCaptor.forClass(String.class);
-        verify(asistenteIAPort).responderRecomendaciones(anyString(), userPromptCaptor.capture());
-        assertThat(userPromptCaptor.getValue()).contains("aún no tiene habilidades validadas");
+        ArgumentCaptor<String> consultaCaptor = ArgumentCaptor.forClass(String.class);
+        verify(catalogoRecursosPort).buscarRelevantes(consultaCaptor.capture(), eq(5));
+        assertThat(consultaCaptor.getValue()).contains("junior");
     }
 }

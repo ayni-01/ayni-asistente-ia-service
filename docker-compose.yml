@@ -25,6 +25,7 @@ services:
     container_name: ayni-asistente-ia-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5440/somosayni
       DB_USERNAME: somosayni
       DB_PASSWORD: somosayni123
       JWT_SECRET: ${JWT_SECRET}
